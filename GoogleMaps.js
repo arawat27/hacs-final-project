@@ -3,10 +3,12 @@ import {
   GoogleMap,
   useLoadScript,
   Marker,
+  Circle,
   InfoWindow,
 } from "@react-google-maps/api";
 import { formatRelative } from "date-fns";
 import mapStyles from "./mapStyles";
+import Geocoding from "./Geocoding.js";
 import Search from "./AutoSearch.js";
 
 //Variable to load libraries
@@ -43,8 +45,10 @@ function Googlemap() {
     libraries,
   });
   
+  const [office, setOffice] = React.useState();
   const [markers, setMarkers] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
+  const [geocode, setGeocode] = React.useState();
 
   const onMapClick = React.useCallback((event) => {
     console.log(event);
@@ -78,17 +82,60 @@ function Googlemap() {
             <span role="img" aria-label="monkey">🐒</span>
         </h1>
 
-        <Search />
+        <Search 
+          setOffice = {(position) => {
+            setOffice(position);
+            mapRef.current?.panTo(position);
+          }}
+        />
+
+        <Geocoding 
+          setGeocode = {(value) => {
+            setGeocode(value);
+            mapRef.current?.panTo(value);
+          }}
+        />
 
         <GoogleMap 
             mapContainerStyle={mapContainerStyle}
-            zoom = {8}
+            zoom = {15}
             center = {center}
             options = {options}
             onClick = {onMapClick}
             onLoad = {onMapLoad}
         >
-            {/* Show a marker component with every click*/}
+
+            {geocode && (
+              <div>
+                <Marker position = {geocode}/>
+              </div>
+            )}
+
+          {/* Like an if statement; only renders marker when office is not null */}
+            {office && (
+              <div>
+                <Marker 
+                  position = {office}
+                  icon = {{
+                    url: "/penguin.svg",
+                    //Size of the penguin marker
+                    scaledSize: new window.google.maps.Size(30,30),
+                    //Place the penguin in the middle of the cursor
+                    origin: new window.google.maps.Point(0,0),
+                    //Half "Size" values position in the middle
+                    anchor: new window.google.maps.Point(15,15),
+                  }}
+                />
+
+                {/* Radius takes meters. So x1000 for kilometers */}
+                <Circle center = {office} radius = {10000} options={closeOptions}/>
+                <Circle center = {office} radius = {15000} options={middleOptions}/>
+                <Circle center = {office} radius = {20000} options={farOptions}/>
+              </div>
+            )}
+
+
+            {/* Show a marker component with every click
             {markers.map(marker => (
                 <Marker 
                     key = {marker.time.toISOString()}
@@ -108,7 +155,7 @@ function Googlemap() {
                         setSelected(marker);
                     }}
                 />
-            ))}
+            ))} */}
 
             {/* Checks to see if selected has a value, otherwise return null */}
             {selected ? (
@@ -130,5 +177,39 @@ function Googlemap() {
     </div>
   );
 }
+
+
+const defaultOptions = {
+  strokeOpacity: 0.5,
+  strokeWeight: 2,
+  clickable: false,
+  draggable: false,
+  editable: false,
+  visible: true,
+};
+
+const closeOptions = {
+  ...defaultOptions,
+  zIndex: 3,
+  fillOpacity: 0.05,
+  strokeColor: "#8BC34A",
+  fillColor: "#8BC34A",
+};
+
+const middleOptions = {
+  ...defaultOptions,
+  zIndex: 2,
+  fillOpacity: 0.05,
+  strokeColor: "#FBC02D",
+  fillColor: "#FBC02D",
+};
+
+const farOptions = {
+  ...defaultOptions,
+  zIndex: 1,
+  fillOpacity: 0.05,
+  strokeColor: "#FE5252",
+  fillColor: "#FE5252",
+};
 
 export default Googlemap;
