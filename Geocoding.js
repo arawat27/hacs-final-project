@@ -1,7 +1,7 @@
 //Necessary import for geolocation feature
 import React, { useState } from 'react';
 
-function Geocoding() {
+function Geocoding({setGeocode}) {
   //Geolocation methods
   const [userLocation, setUserLocation] = useState();
   
@@ -20,6 +20,10 @@ function Geocoding() {
 
           //update userLocation
           setUserLocation({ latitude, longitude });
+          setGeocode({ lat: latitude, lng: longitude });
+
+          /**Add panTo() function here if want to pan to geolocation */
+
         },
         (error) => {
           
@@ -49,6 +53,8 @@ function Geocoding() {
             <h2>User Location</h2>
             <p>Latitude: {userLocation.latitude}</p>
             <p>Longitude: {userLocation.longitude}</p>
+
+            
           </div>
         
       )}
