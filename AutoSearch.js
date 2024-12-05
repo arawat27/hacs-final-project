@@ -4,9 +4,9 @@ import PlacesAutocomplete, {
     getGeocode,
     getLatLng,
 } from "react-places-autocomplete";
-import { Marker }from "@react-google-maps/api";
 
-function Search() {
+
+function Search({ setOffice }) {
     const [address, setAddress] = React.useState("");
     const [coordinates, setCoordinates] = React.useState({
         lat: null,
@@ -16,11 +16,11 @@ function Search() {
     //Receives address of selection they selected
     const handleSelect = async (value) => {
         const results = await geocodeByAddress(value);
-        const latLng = await getLatLng(results[0]);
+        const {lat, lng} = await getLatLng(results[0]);
         setAddress(value);
-        setCoordinates(latLng);
+        setCoordinates({lat, lng});
 
-        <Marker position = {{lat: coordinates.lat, lng: coordinates.lng}} />
+        setOffice({lat, lng});
     };
 
     return (
