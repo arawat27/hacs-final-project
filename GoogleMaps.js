@@ -5,11 +5,16 @@ import {
   Marker,
   Circle,
   InfoWindow,
+  MarkerClusterer,
+  DirectionsService,
+  DirectionsRenderer,
+  DistanceMatrixService,
 } from "@react-google-maps/api";
 import { formatRelative } from "date-fns";
 import mapStyles from "./mapStyles";
 import Geocoding from "./Geocoding.js";
-import Search from "./AutoSearch.js";
+// import Search from "./AutoSearch.js";
+
 
 //Variable to load libraries
 const libraries = ["places"];
@@ -49,6 +54,7 @@ function Googlemap() {
   const [markers, setMarkers] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
   const [geocode, setGeocode] = React.useState();
+  const [directions, setDirections] = React.useState();
 
   const onMapClick = React.useCallback((event) => {
     console.log(event);
@@ -70,6 +76,24 @@ function Googlemap() {
     mapRef.current = map;
   }, []);
 
+  const centers = React.useMemo(() => generateCenters());
+
+  const fetchDirections = (center) => {
+    if (!geocode) return;
+
+    //Create new instance of DirectionsService
+    const directionService = new DirectionsService();
+    
+    //Route from user location to selected Marker
+    directionService.route(
+      {
+        origin: geocode,
+        destination: center,
+        travelMode: "DRIVING",
+      }
+    );
+  };
+
   if (loadError) return "Error loading maps";
   if (!isLoaded) return "Loading Maps";
 
@@ -82,12 +106,12 @@ function Googlemap() {
             <span role="img" aria-label="monkey">🐒</span>
         </h1>
 
-        <Search 
+        {/* <Search 
           setOffice = {(position) => {
             setOffice(position);
             mapRef.current?.panTo(position);
           }}
-        />
+        /> */}
 
         <Geocoding 
           setGeocode = {(value) => {
@@ -98,12 +122,14 @@ function Googlemap() {
 
         <GoogleMap 
             mapContainerStyle={mapContainerStyle}
-            zoom = {15}
+            zoom = {9}
             center = {center}
             options = {options}
             onClick = {onMapClick}
             onLoad = {onMapLoad}
         >
+
+            {directions && <DirectionsRenderer directions = {directions}/>}
 
             {geocode && (
               <div>
@@ -112,25 +138,40 @@ function Googlemap() {
             )}
 
           {/* Like an if statement; only renders marker when office is not null */}
-            {office && (
+            {geocode && (
               <div>
                 <Marker 
-                  position = {office}
-                  icon = {{
-                    url: "/penguin.svg",
-                    //Size of the penguin marker
-                    scaledSize: new window.google.maps.Size(30,30),
-                    //Place the penguin in the middle of the cursor
-                    origin: new window.google.maps.Point(0,0),
-                    //Half "Size" values position in the middle
-                    anchor: new window.google.maps.Point(15,15),
-                  }}
+                  position = {geocode}
                 />
 
+                <MarkerClusterer>
+                  {clusterer => (
+                    centers.map(center => (
+                      <Marker 
+                        key = {center.key} 
+                        position = {center}
+                        clusterer = {clusterer}
+                        onClick = {() => {
+                          fetchDirections({lat: center.lat, lng: center.lng});
+                        }}
+                        icon = {{
+                          url: "/penguin.svg",
+                          //Size of the penguin marker
+                          scaledSize: new window.google.maps.Size(30,30),
+                          //Place the penguin in the middle of the cursor
+                          origin: new window.google.maps.Point(0,0),
+                          //Half "Size" values position in the middle
+                          anchor: new window.google.maps.Point(15,15),
+                        }}
+                      />
+                    ))
+                  )}
+                </MarkerClusterer>
+
                 {/* Radius takes meters. So x1000 for kilometers */}
-                <Circle center = {office} radius = {10000} options={closeOptions}/>
-                <Circle center = {office} radius = {15000} options={middleOptions}/>
-                <Circle center = {office} radius = {20000} options={farOptions}/>
+                <Circle center = {geocode} radius = {10000} options={closeOptions}/>
+                <Circle center = {geocode} radius = {15000} options={middleOptions}/>
+                <Circle center = {geocode} radius = {20000} options={farOptions}/>
               </div>
             )}
 
@@ -211,5 +252,19 @@ const farOptions = {
   strokeColor: "#FE5252",
   fillColor: "#FE5252",
 };
+
+const generateCenters = () => {
+  const centers = [
+    {key: "Wild At Heart", lat: 33.776189217972444, lng: -111.98514312599812},
+    {key: "Liberty Wildlife", lat: 33.41637679623698, lng: -112.02528001218086},
+    {key: "Southwest Wildlife Conservation Center", lat: 33.7338598253034, lng: -111.74629194852704},
+    {key: "Fallen Feathers", lat: 33.702751770754126, lng: -112.26533198990042},
+    {key: "US Fish & Wildlife Services", lat: 33.57731569886941, lng: -112.12732390007805},
+    {key: "US Wildlife Services", lat: 33.587462860648685, lng: -112.1062846319471},
+  ];
+  
+  return centers;
+};
+
 
 export default Googlemap;
