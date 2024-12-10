@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <!-- Penguin Body -->
+  <circle cx="50" cy="60" r="30" fill="black" />
+  
+  <!-- Penguin Belly -->
+  <ellipse cx="50" cy="70" rx="20" ry="25" fill="white" />
+  
+  <!-- Penguin Head -->
+  <circle cx="50" cy="30" r="15" fill="black" />
+  
+  <!-- Penguin Eyes -->
+  <circle cx="45" cy="25" r="3" fill="white" />
+  <circle cx="55" cy="25" r="3" fill="white" />
+  
+  <!-- Penguin Beak -->
+  <polygon points="50,32 47,36 53,36" fill="orange" />
+  
+  <!-- Penguin Wings -->
+  <ellipse cx="35" cy="60" rx="10" ry="20" fill="black" />
+  <ellipse cx="65" cy="60" rx="10" ry="20" fill="black" />
+  
+  <!-- Penguin Feet -->
+  <ellipse cx="40" cy="90" rx="6" ry="3" fill="orange" />
+  <ellipse cx="60" cy="90" rx="6" ry="3" fill="orange" />
+</svg>
